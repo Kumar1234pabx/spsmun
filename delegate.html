@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SPSMUN 3.0 · Delegate Profile</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg:      #030b18;
+  --bg2:     #071224;
+  --bg3:     #0a1a35;
+  --surface: #0f2347;
+  --border:  #162d52;
+  --text:    #e8f0fe;
+  --muted:   #4a6080;
+  --font-h:  'Syne', sans-serif;
+  --font-b:  'DM Sans', sans-serif;
+  --font-m:  'DM Mono', monospace;
+  --accent:  #f5a623;
+  --c:       #7c3aed; /* overridden by JS */
+}
+html { background: var(--bg); color: var(--text); font-family: var(--font-b); }
+body { min-height: 100vh; }
+
+/* ── PARTICLES BG ── */
+#particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
+.particle {
+  position: absolute; border-radius: 50%;
+  animation: float linear infinite;
+  opacity: .12;
+}
+@keyframes float {
+  0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+  10%  { opacity: .12; }
+  90%  { opacity: .08; }
+  100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+}
+
+/* ── PAGE ── */
+.page { position: relative; z-index: 1; max-width: 520px; margin: 0 auto; padding: 0 0 60px; }
+
+/* ── HEADER BAND ── */
+.header-band {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(180deg, #0d1f40 0%, transparent 100%);
+  display: flex; align-items: center; gap: 12px;
+  position: sticky; top: 0; z-index: 10;
+  backdrop-filter: blur(12px);
+}
+.logo-m {
+  width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #f5a623, #d4881e);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-h); font-weight: 900; font-size: 16px; color: #fff;
+  box-shadow: 0 4px 16px #f5a62330;
+}
+.header-text p:first-child { font-family: var(--font-m); font-size: 9px; color: var(--muted); letter-spacing: 2.5px; }
+.header-text p:last-child  { font-family: var(--font-h); font-size: 15px; font-weight: 700; color: var(--text); }
+.id-chip {
+  margin-left: auto; font-family: var(--font-m); font-size: 11px;
+  padding: 4px 12px; border-radius: 20px; font-weight: 500;
+  border: 1px solid; /* color set by JS */
+  flex-shrink: 0;
+}
+
+/* ── HERO CARD ── */
+.hero-card {
+  margin: 20px 20px 0;
+  border-radius: 22px; overflow: hidden;
+  border: 1px solid var(--border);
+  background: linear-gradient(145deg, var(--bg2), var(--bg3));
+  box-shadow: 0 0 60px rgba(0,0,0,.5);
+  animation: slideUp .5s ease both;
+}
+@keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+.hero-top {
+  padding: 24px 24px 20px;
+  position: relative; overflow: hidden;
+}
+.hero-glow {
+  position: absolute; top: -40px; right: -40px;
+  width: 160px; height: 160px; border-radius: 50%;
+  filter: blur(60px); opacity: .25;
+  pointer-events: none;
+}
+.avatar-row { display: flex; gap: 16px; align-items: flex-start; position: relative; z-index: 1; }
+.avatar {
+  width: 64px; height: 64px; border-radius: 18px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-h); font-size: 22px; font-weight: 800; color: #fff;
+  box-shadow: 0 8px 24px rgba(0,0,0,.4);
+}
+.delegate-name {
+  font-family: var(--font-h); font-size: 26px; font-weight: 800;
+  color: var(--text); line-height: 1.1; margin-bottom: 4px;
+}
+.delegate-sub { font-size: 13px; color: var(--muted); font-family: var(--font-m); }
+.committee-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px; padding: 6px 14px; border-radius: 20px;
+  font-family: var(--font-h); font-size: 12px; font-weight: 700; color: #fff;
+}
+.committee-tag::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.6); }
+
+.hero-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: var(--border);
+  border-top: 1px solid var(--border);
+}
+.hero-cell {
+  background: var(--bg2); padding: 14px 18px;
+}
+.hero-cell:first-child { border-radius: 0; }
+.cell-label { font-family: var(--font-m); font-size: 9px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+.cell-val { font-size: 14px; font-weight: 700; color: var(--text); font-family: var(--font-h); }
+.cell-val.mono { font-family: var(--font-m); font-size: 13px; }
+
+/* ── QR SECTION ── */
+.qr-section {
+  margin: 14px 20px 0;
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 18px;
+  padding: 20px; text-align: center;
+  animation: slideUp .5s .1s ease both;
+}
+.qr-label { font-family: var(--font-m); font-size: 9px; color: var(--muted); letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 14px; }
+.qr-wrap { display: inline-block; padding: 12px; background: #fff; border-radius: 14px; }
+.qr-wrap img { display: block; border-radius: 6px; }
+.qr-note { font-family: var(--font-m); font-size: 9px; color: var(--muted); margin-top: 10px; }
+
+/* ── MAP SECTION ── */
+.map-section {
+  margin: 14px 20px 0;
+  animation: slideUp .5s .2s ease both;
+}
+.section-label {
+  font-family: var(--font-m); font-size: 9px; color: var(--muted);
+  letter-spacing: 2.5px; text-transform: uppercase; margin-bottom: 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.section-label::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+
+.venue-map {
+  background: var(--bg3); border: 1px solid var(--border); border-radius: 18px;
+  padding: 14px; overflow: hidden;
+}
+.map-grid {
+  position: relative; width: 100%; padding-bottom: 58%;
+  background: #04101f; border-radius: 12px; overflow: hidden;
+  border: 1px solid #0a1a35;
+}
+.room {
+  position: absolute; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .4s cubic-bezier(.34,1.56,.64,1);
+  cursor: default;
+}
+.room span {
+  font-family: var(--font-m); font-size: 8px; font-weight: 500;
+  text-align: center; line-height: 1.3; white-space: pre-line;
+  padding: 2px 4px;
+}
+.room.highlight { animation: pulse 2s ease-in-out infinite; }
+@keyframes pulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(var(--hl-rgb),.4); }
+  50%      { box-shadow: 0 0 0 8px rgba(var(--hl-rgb),.0); }
+}
+.map-legend {
+  margin-top: 10px; text-align: center;
+  font-family: var(--font-m); font-size: 10px; color: var(--muted);
+}
+.map-legend strong { font-weight: 700; }
+
+/* ── CONFERENCE INFO ── */
+.info-section {
+  margin: 14px 20px 0;
+  animation: slideUp .5s .3s ease both;
+}
+.info-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.info-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px; text-align: center;
+}
+.info-icon { font-size: 22px; margin-bottom: 6px; }
+.info-card-label { font-family: var(--font-m); font-size: 9px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 4px; }
+.info-card-val { font-family: var(--font-h); font-size: 13px; font-weight: 700; color: var(--text); }
+
+/* ── FOOTER ── */
+.footer {
+  margin: 24px 20px 0; text-align: center;
+  font-family: var(--font-m); font-size: 9px; color: #1a3050;
+  letter-spacing: 1.5px;
+}
+
+/* ── ERROR STATE ── */
+.error-page {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 12px; padding: 40px;
+  position: relative; z-index: 1;
+}
+.error-page h1 { font-family: var(--font-h); font-size: 24px; color: #f87171; }
+.error-page p  { font-size: 13px; color: var(--muted); text-align: center; max-width: 300px; }
+</style>
+</head>
+<body>
+
+<!-- Animated particles -->
+<div id="particles"></div>
+
+<div class="page" id="page" style="display:none"></div>
+<div id="errorPage" style="display:none" class="error-page">
+  <div style="font-size:48px">🔒</div>
+  <h1>Invalid Access</h1>
+  <p>This QR code is invalid or has been tampered with. Please use the QR code on your delegate ID card.</p>
+</div>
+
+<script>
+// ── CONSTANTS ──────────────────────────────────────────────────────────────
+const SECRET = "SPSMUN3-HOD-2025";
+
+const DELEGATES = [
+  {id:1,  name:"Ansh",              cls:"5th",  section:"Sweeticia",    portfolio:"Turkiye",           committee:"UNCSW",          contact:"8437609948", minister:""},
+  {id:2,  name:"Japleen Kaur",      cls:"7th",  section:"Gladiolus",    portfolio:"Finland",           committee:"WHO",            contact:"7567125125", minister:""},
+  {id:3,  name:"Prathamesh Verma",  cls:"10th", section:"Frost",        portfolio:"Sudan",             committee:"WHO",            contact:"7404227950", minister:""},
+  {id:4,  name:"Yash Dhiman",       cls:"10th", section:"Frost",        portfolio:"Latvia",            committee:"UNSC",           contact:"7988639832", minister:""},
+  {id:5,  name:"Viraj Goswami",     cls:"9th",  section:"TS Eliot",     portfolio:"—",                 committee:"AIPPM",          contact:"9996770054", minister:"Pankaj Kr Gupta"},
+  {id:6,  name:"Marvi",             cls:"5th",  section:"Sweeticia",    portfolio:"Nepal",             committee:"WHO",            contact:"9857758901", minister:""},
+  {id:7,  name:"Akul Atri",         cls:"9th",  section:"Shakespeare",  portfolio:"Newzealand",        committee:"WHO",            contact:"7696066624", minister:""},
+  {id:8,  name:"Shivam Gupta",      cls:"8th",  section:"Iris",         portfolio:"—",                 committee:"IP-Caricature",  contact:"9877786395", minister:""},
+  {id:9,  name:"Khyati Bisht",      cls:"9th",  section:"Blake",        portfolio:"Brazil",            committee:"UNGA",           contact:"—",          minister:""},
+  {id:10, name:"Shreeya Sharma",    cls:"9th",  section:"TS Eliot",     portfolio:"Bahrain",           committee:"UNSC",           contact:"7807320811", minister:""},
+  {id:11, name:"Nipun Gaur",        cls:"9th",  section:"Shelly",       portfolio:"SLOVENIA",          committee:"UNGA",           contact:"9991511055", minister:""},
+  {id:12, name:"Pihu",              cls:"7th",  section:"Dahlia",       portfolio:"AUSTRIA",           committee:"WHO",            contact:"9416376023", minister:""},
+  {id:13, name:"Banveer Singh",     cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IP-Photography", contact:"8194949485", minister:""},
+  {id:14, name:"Niharika Sharma",   cls:"9th",  section:"TS Eliot",     portfolio:"Hungary",           committee:"UNGA",           contact:"8427492918", minister:""},
+  {id:15, name:"Vania Rana",        cls:"9th",  section:"TS Eliot",     portfolio:"Ethiopia",          committee:"UNGA",           contact:"9872795032", minister:""},
+  {id:16, name:"Harman Sharma",     cls:"9th",  section:"Shelly",       portfolio:"—",                 committee:"IP-Photography", contact:"9467239753", minister:""},
+  {id:17, name:"Saanvi",            cls:"9th",  section:"John Donne",   portfolio:"Morocco",           committee:"UNHRC",          contact:"9464705131", minister:""},
+  {id:18, name:"Bhavya Sharma",     cls:"9th",  section:"Shakespeare",  portfolio:"Sweden",            committee:"UNHRC",          contact:"7988787180", minister:""},
+  {id:19, name:"Vanya Tyagi",       cls:"10th", section:"Ruskin Bond",  portfolio:"Mexico",            committee:"UNGA",           contact:"9718591957", minister:""},
+  {id:20, name:"Abhijot Singh",     cls:"9th",  section:"O Henry",      portfolio:"—",                 committee:"IP-Journalism",  contact:"8427457182", minister:""},
+  {id:21, name:"Arpit Srivastava",  cls:"9th",  section:"Blake",        portfolio:"Germany",           committee:"UNGA",           contact:"7986431393", minister:""},
+  {id:22, name:"Krishit Singroha",  cls:"9th",  section:"Blake",        portfolio:"Netherlands",       committee:"UNGA",           contact:"8437302494", minister:""},
+  {id:23, name:"Aarab Bir",         cls:"10th", section:"Frost",        portfolio:"Sweden",            committee:"UNGA",           contact:"9316599266", minister:""},
+  {id:24, name:"Pulkit Singh",      cls:"9th",  section:"Shelly",       portfolio:"Serbia",            committee:"UNGA",           contact:"7719614502", minister:""},
+  {id:25, name:"Aarav Garg",        cls:"7th",  section:"Jasmine",      portfolio:"Ghana",             committee:"WHO Beginners",  contact:"8872481413", minister:""},
+  {id:26, name:"Aishra Gupta",      cls:"7th",  section:"Jasmine",      portfolio:"Yemen",             committee:"WHO Beginners",  contact:"9454566153", minister:""},
+  {id:27, name:"Siyona Bharwaj",    cls:"6th",  section:"Freesia",      portfolio:"Jamaica",           committee:"WHO BEGINNERS",  contact:"8351049760", minister:""},
+  {id:28, name:"Vamika Gupta",      cls:"7th",  section:"Primrose",     portfolio:"—",                 committee:"IP-Photography", contact:"7988203324", minister:""},
+  {id:29, name:"Chirag",            cls:"9th",  section:"Lawrence",     portfolio:"Colombia",          committee:"UNSC",           contact:"8360605816", minister:""},
+  {id:30, name:"Ansh Rana",         cls:"9th",  section:"Shelly",       portfolio:"—",                 committee:"IP Photography", contact:"9729460539", minister:""},
+  {id:31, name:"Abhay Sharma",      cls:"8th",  section:"Florentia",    portfolio:"—",                 committee:"IP Photography", contact:"9468001800", minister:""},
+  {id:32, name:"Tanmay Gautam",     cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IPL",            contact:"8289008191", minister:"Punjab Kings"},
+  {id:33, name:"Angel",             cls:"9th",  section:"Austen",       portfolio:"Tajikistan",        committee:"UNGA",           contact:"8295489180", minister:""},
+  {id:34, name:"Divyansh Chauhan",  cls:"9th",  section:"John Donne",   portfolio:"Argentina",         committee:"UNGA",           contact:"9996326606", minister:""},
+  {id:35, name:"Urmi",              cls:"9th",  section:"Kipling",      portfolio:"Luxembourg",        committee:"UNGA",           contact:"9690011275", minister:""},
+  {id:36, name:"Digvijay Sinver",   cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IP-Photography", contact:"8398000100", minister:""},
+  {id:37, name:"Ayushman",          cls:"6th",  section:"Hyacinth",     portfolio:"Somalia",           committee:"UNGA",           contact:"9452294523", minister:""},
+  {id:38, name:"Gurnoor",           cls:"9th",  section:"John Donne",   portfolio:"Algeria",           committee:"UNHRC",          contact:"8847442489", minister:""},
+  {id:39, name:"Sarvagya",          cls:"9th",  section:"Kipling",      portfolio:"Japan",             committee:"UNCSW",          contact:"7982759154", minister:""},
+  {id:40, name:"Digvi Chopra",      cls:"6th",  section:"Hyacinth",     portfolio:"Yemen",             committee:"UNGA",           contact:"8901370320", minister:""},
+  {id:41, name:"Manvi",             cls:"6th",  section:"Hyacinth",     portfolio:"Romania",           committee:"UNGA",           contact:"9646699777", minister:""},
+  {id:42, name:"Kanishka Sood",     cls:"9th",  section:"Kipling",      portfolio:"Peru",              committee:"UNCSW",          contact:"8285962410", minister:""},
+  {id:43, name:"Kanishka",          cls:"7th",  section:"Dhalia",       portfolio:"Cuba",              committee:"WHO Beginners",  contact:"8901355553", minister:""},
+  {id:44, name:"Abhimanyu",         cls:"7th",  section:"Dhalia",       portfolio:"Cyprus",            committee:"WHO Beginners",  contact:"9582416700", minister:""},
+  {id:45, name:"Aradhya",           cls:"7th",  section:"Dhalia",       portfolio:"Myanmar",           committee:"WHO Beginners",  contact:"9318037982", minister:""},
+  {id:46, name:"Yohaan Jassi",      cls:"7th",  section:"Azalea",       portfolio:"Malta",             committee:"WHO Beginners",  contact:"8288888131", minister:""},
+  {id:47, name:"Suryansh Pal",      cls:"7th",  section:"Gladiolus",    portfolio:"Bahrain",           committee:"UNGA",           contact:"9041164076", minister:""},
+  {id:48, name:"Gauri Verma",       cls:"9th",  section:"Kipling",      portfolio:"Mauritius",         committee:"UNCSW",          contact:"6283872134", minister:""},
+  {id:49, name:"Kaushal",           cls:"6th",  section:"Crocus",       portfolio:"Form To Be Filled", committee:"—",              contact:"not found",  minister:""},
+  {id:50, name:"Aayan Kalotra",     cls:"7th",  section:"Aster",        portfolio:"Cambodia",          committee:"WHO Beginners",  contact:"9646767650", minister:""},
+  {id:51, name:"Prakhar Gautam",    cls:"9th",  section:"Shakespeare",  portfolio:"Russian Federation", committee:"UNSC",          contact:"7049977318", minister:""},
+];
+
+// ── TOKEN CHECK ──────────────────────────────────────────────────────────
+function simpleHash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(36).toUpperCase().padStart(7, "0");
+}
+function expectedToken(id) { return simpleHash(SECRET + id); }
+
+// ── COMMITTEE COLORS ──────────────────────────────────────────────────────
+const C = {
+  "UNCSW":         { hex: "#7c3aed", rgb: "124,58,237"  },
+  "WHO":           { hex: "#059669", rgb: "5,150,105"    },
+  "UNSC":          { hex: "#dc2626", rgb: "220,38,38"    },
+  "AIPPM":         { hex: "#d97706", rgb: "217,119,6"    },
+  "UNGA":          { hex: "#2563eb", rgb: "37,99,235"    },
+  "UNHRC":         { hex: "#db2777", rgb: "219,39,119"   },
+  "IP-Photography":{ hex: "#7c3aed", rgb: "124,58,237"  },
+  "IP Photography":{ hex: "#7c3aed", rgb: "124,58,237"  },
+  "IP-Journalism": { hex: "#ca8a04", rgb: "202,138,4"    },
+  "IP-Caricature": { hex: "#b45309", rgb: "180,83,9"     },
+  "WHO Beginners": { hex: "#0d9488", rgb: "13,148,136"   },
+  "WHO BEGINNERS": { hex: "#0d9488", rgb: "13,148,136"   },
+  "IPL":           { hex: "#9333ea", rgb: "147,51,234"   },
+};
+function cs(c) { return C[c] || { hex: "#475569", rgb: "71,85,105" }; }
+function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+
+// ── MAP ROOMS ─────────────────────────────────────────────────────────────
+const ROOMS = [
+  { name:"UNGA",           x:5,  y:5,  w:34, h:22, color:"#2563eb", rgb:"37,99,235",   keys:["UNGA"] },
+  { name:"UNSC",           x:43, y:5,  w:20, h:22, color:"#dc2626", rgb:"220,38,38",   keys:["UNSC"] },
+  { name:"UNHRC",          x:67, y:5,  w:28, h:22, color:"#db2777", rgb:"219,39,119",  keys:["UNHRC"] },
+  { name:"UNCSW",          x:5,  y:32, w:26, h:22, color:"#7c3aed", rgb:"124,58,237",  keys:["UNCSW"] },
+  { name:"WHO",            x:35, y:32, w:24, h:22, color:"#059669", rgb:"5,150,105",   keys:["WHO"] },
+  { name:"AIPPM",          x:63, y:32, w:32, h:22, color:"#d97706", rgb:"217,119,6",   keys:["AIPPM"] },
+  { name:"WHO\nBeginners", x:5,  y:59, w:26, h:24, color:"#0d9488", rgb:"13,148,136",  keys:["WHO Beginners","WHO BEGINNERS"] },
+  { name:"IP\nRooms",      x:35, y:59, w:30, h:24, color:"#7c3aed", rgb:"124,58,237",  keys:["IP-Photography","IP Photography","IP-Journalism","IP-Caricature"] },
+  { name:"IPL",            x:69, y:59, w:26, h:24, color:"#9333ea", rgb:"147,51,234",  keys:["IPL"] },
+  { name:"Info &\nReg",    x:30, y:0,  w:22, h:4,  color:"#f5a623", rgb:"245,166,35",  keys:[] },
+];
+
+// ── PARTICLES ────────────────────────────────────────────────────────────
+function spawnParticles(color) {
+  const container = document.getElementById("particles");
+  for (let i = 0; i < 18; i++) {
+    const p = document.createElement("div");
+    p.className = "particle";
+    const size = 4 + Math.random() * 12;
+    p.style.cssText = `
+      width:${size}px; height:${size}px;
+      left:${Math.random()*100}%;
+      background:${color};
+      animation-duration:${8+Math.random()*14}s;
+      animation-delay:${Math.random()*-20}s;
+    `;
+    container.appendChild(p);
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render(d) {
+  const color = cs(d.committee);
+  const page = document.getElementById("page");
+
+  // CSS vars
+  document.documentElement.style.setProperty("--c", color.hex);
+  spawnParticles(color.hex);
+
+  const portLabel = (d.committee === "AIPPM" || d.committee === "IPL") ? "MINISTER" : "PORTFOLIO";
+  const portVal   = d.minister || d.portfolio;
+
+  // ── MAP HTML ──
+  const mapRooms = ROOMS.map(r => {
+    const isHL = r.keys.some(k => k === d.committee);
+    const bg   = isHL ? r.color : `${r.color}18`;
+    const border = isHL ? r.color : `${r.color}33`;
+    const textColor = isHL ? "#fff" : r.color + "99";
+    const hl = isHL ? `highlight" style="--hl-rgb:${r.rgb}` : "";
+    return `
+      <div class="room ${hl}" style="
+        left:${r.x}%; top:${r.y}%; width:${r.w}%; height:${r.h}%;
+        background:${bg}; border:1.5px solid ${border};
+        ${isHL ? `box-shadow:0 0 20px ${r.color}66;` : ""}
+      ">
+        <span style="color:${textColor};font-weight:${isHL?700:400}">${r.name}</span>
+      </div>`;
+  }).join("");
+
+  const qrUrl = window.location.href;
+  const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(qrUrl)}&color=0a1628&bgcolor=ffffff&qzone=1`;
+
+  page.innerHTML = `
+    <header class="header-band">
+      <div class="logo-m">M</div>
+      <div class="header-text">
+        <p>SPSMUN 3.0 · DELEGATE PORTAL</p>
+        <p>My Credentials</p>
+      </div>
+      <div class="id-chip" style="color:${color.hex};border-color:${color.hex}44;background:${color.hex}18">
+        ID-${String(d.id).padStart(3,"0")}
+      </div>
+    </header>
+
+    <div class="hero-card">
+      <div class="hero-top">
+        <div class="hero-glow" style="background:${color.hex}"></div>
+        <div class="avatar-row">
+          <div class="avatar" style="background:linear-gradient(135deg,${color.hex},${color.hex}88)">${initials(d.name)}</div>
+          <div>
+            <div class="delegate-name">${d.name}</div>
+            <div class="delegate-sub">CLASS ${d.cls.toUpperCase()} &nbsp;·&nbsp; ${d.section}</div>
+            <div class="committee-tag" style="background:${color.hex}33;color:${color.hex};border:1px solid ${color.hex}44">
+              ${d.committee}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="hero-grid">
+        <div class="hero-cell">
+          <div class="cell-label">${portLabel}</div>
+          <div class="cell-val">${portVal}</div>
+        </div>
+        <div class="hero-cell">
+          <div class="cell-label">SECTION</div>
+          <div class="cell-val">${d.section}</div>
+        </div>
+        <div class="hero-cell">
+          <div class="cell-label">CLASS</div>
+          <div class="cell-val">${d.cls}</div>
+        </div>
+        <div class="hero-cell">
+          <div class="cell-label">CONTACT</div>
+          <div class="cell-val mono">${d.contact}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-label">Your Delegate QR Code</div>
+      <div class="qr-wrap">
+        <img src="${qrSrc}" width="160" height="160" alt="Your QR Code" loading="lazy"/>
+      </div>
+      <div class="qr-note">Scan to re-open this page · SPSMUN-3 · SR #${d.id}</div>
+    </div>
+
+    <div class="map-section">
+      <div class="section-label">Conference Venue Map</div>
+      <div class="venue-map">
+        <div class="map-grid">${mapRooms}</div>
+        <div class="map-legend">
+          Your committee <strong style="color:${color.hex}">${d.committee}</strong> is highlighted above
+        </div>
+      </div>
+    </div>
+
+    <div class="info-section">
+      <div class="section-label">Conference Info</div>
+      <div class="info-cards">
+        <div class="info-card">
+          <div class="info-icon">📍</div>
+          <div class="info-card-label">Venue</div>
+          <div class="info-card-val">SPS School<br>Panchkula</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">📅</div>
+          <div class="info-card-label">Edition</div>
+          <div class="info-card-val">SPSMUN 3.0<br>2025</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🏛</div>
+          <div class="info-card-label">Committee</div>
+          <div class="info-card-val" style="color:${color.hex}">${d.committee}</div>
+        </div>
+        <div class="info-card">
+          <div class="info-icon">🌐</div>
+          <div class="info-card-label">Delegate ID</div>
+          <div class="info-card-val" style="font-family:var(--font-m)">SR-${String(d.id).padStart(3,"0")}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      SPSMUN 3.0 · DELEGATE CREDENTIALS · CONFIDENTIAL · DO NOT SHARE
+    </div>
+  `;
+
+  page.style.display = "block";
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const rawId  = params.get("id");
+  const token  = params.get("t");
+
+  if (!rawId || !token) {
+    document.getElementById("errorPage").style.display = "flex"; return;
+  }
+
+  const id = parseInt(rawId, 10);
+  if (isNaN(id) || token !== expectedToken(id)) {
+    document.getElementById("errorPage").style.display = "flex"; return;
+  }
+
+  const delegate = DELEGATES.find(d => d.id === id);
+  if (!delegate) {
+    document.getElementById("errorPage").style.display = "flex"; return;
+  }
+
+  render(delegate);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SPSMUN 3.0 · HOD Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #03070f;
+    --bg2:      #060d1a;
+    --bg3:      #0a1628;
+    --surface:  #0f1f3d;
+    --border:   #1a2d4a;
+    --text:     #e8f0fe;
+    --muted:    #4a6080;
+    --gold:     #f5a623;
+    --gold2:    #d4881e;
+    --font-h:   'Syne', sans-serif;
+    --font-b:   'DM Sans', sans-serif;
+    --font-m:   'DM Mono', monospace;
+  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font-b); overflow: hidden; }
+
+  /* ── LAYOUT ── */
+  .shell { display: flex; flex-direction: column; height: 100vh; }
+  .topbar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 14px 28px; border-bottom: 1px solid var(--border);
+    background: linear-gradient(90deg, var(--bg2), var(--bg3));
+    flex-shrink: 0;
+  }
+  .logo-badge {
+    width: 46px; height: 46px; border-radius: 13px; flex-shrink: 0;
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-h); font-weight: 900; font-size: 20px; color: #fff;
+    box-shadow: 0 4px 20px #f5a62340;
+  }
+  .topbar-title h1 { font-family: var(--font-h); font-size: 18px; font-weight: 800; color: var(--text); }
+  .topbar-title p  { font-family: var(--font-m); font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-top: 1px; }
+  .delegate-pill {
+    margin-left: auto;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 5px 14px;
+    font-family: var(--font-m); font-size: 12px; color: var(--gold); font-weight: 500;
+  }
+
+  .body { display: flex; flex: 1; min-height: 0; }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: 290px; flex-shrink: 0;
+    background: var(--bg2); border-right: 1px solid var(--border);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .sidebar-top { padding: 14px 14px 0; }
+  .search-wrap {
+    background: var(--bg3); border: 1px solid var(--border); border-radius: 10px;
+    padding: 9px 12px; display: flex; align-items: center; gap: 8;
+  }
+  .search-wrap input {
+    background: none; border: none; outline: none;
+    color: var(--text); font-size: 13px; font-family: var(--font-b); width: 100%;
+  }
+  .search-wrap input::placeholder { color: var(--muted); }
+  .filters { padding: 10px 14px; display: flex; flex-wrap: wrap; gap: 5px; }
+  .filter-btn {
+    font-family: var(--font-m); font-size: 9px; font-weight: 500; letter-spacing: .5px;
+    padding: 4px 9px; border-radius: 20px; border: 1px solid var(--border);
+    background: var(--bg3); color: var(--muted); cursor: pointer; transition: all .15s;
+  }
+  .filter-btn:hover { color: var(--text); border-color: #334155; }
+  .filter-btn.active { color: #fff; border-color: transparent; }
+
+  .list-header {
+    padding: 0 14px 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .list-header span { font-family: var(--font-m); font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; }
+  .select-all-btn {
+    background: none; border: none; color: var(--gold); font-size: 11px; cursor: pointer;
+    font-family: var(--font-b); font-weight: 600;
+  }
+
+  .delegate-list { flex: 1; overflow-y: auto; }
+  .delegate-list::-webkit-scrollbar { width: 4px; }
+  .delegate-list::-webkit-scrollbar-track { background: transparent; }
+  .delegate-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .d-item {
+    padding: 9px 14px; display: flex; align-items: center; gap: 10;
+    border-bottom: 1px solid #0a1628; cursor: pointer;
+    border-left: 3px solid transparent; transition: all .12s;
+  }
+  .d-item:hover { background: #0a1628; }
+  .d-item.selected { background: var(--surface); }
+  .d-avatar {
+    width: 34px; height: 34px; border-radius: 9px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-h); font-size: 11px; font-weight: 800;
+  }
+  .d-info { flex: 1; min-width: 0; }
+  .d-info .name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-info .sub  { font-size: 10px; color: var(--muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .d-num { font-family: var(--font-m); font-size: 10px; color: #1e3a5f; flex-shrink: 0; }
+
+  /* ── MAIN ── */
+  .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+  .actionbar {
+    padding: 10px 20px; border-bottom: 1px solid var(--border);
+    display: flex; gap: 8px; align-items: center; background: var(--bg2); flex-shrink: 0;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), var(--gold2));
+    color: #fff; border: none; border-radius: 9px;
+    padding: 9px 18px; font-size: 12px; font-weight: 700;
+    font-family: var(--font-b); cursor: pointer; display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 4px 14px #f5a62330; transition: transform .1s;
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+  .btn-sec {
+    background: var(--surface); color: #8096b0; border: 1px solid var(--border);
+    border-radius: 9px; padding: 9px 14px; font-size: 12px;
+    font-family: var(--font-b); cursor: pointer; transition: all .15s;
+  }
+  .btn-sec:hover { color: var(--text); border-color: #334155; }
+  .btn-danger {
+    background: #1a0a0a; color: #f87171; border: 1px solid #3f0a0a;
+    border-radius: 9px; padding: 9px 14px; font-size: 12px;
+    font-family: var(--font-b); cursor: pointer;
+  }
+  .sel-count { color: var(--muted); font-size: 12px; margin-left: 4px; }
+
+  /* ── URL BANNER ── */
+  .url-banner {
+    margin: 0 20px;
+    background: linear-gradient(90deg, #0a1f0a, #0f2a10);
+    border: 1px solid #1a4a1a; border-radius: 10px;
+    padding: 10px 16px; display: flex; align-items: center; gap: 10;
+    margin-top: 14px; margin-bottom: 0;
+  }
+  .url-banner span { font-family: var(--font-m); font-size: 11px; color: #4ade80; flex: 1; word-break: break-all; }
+  .url-edit { background: none; border: 1px solid #2a5a2a; color: #4ade80; border-radius: 6px; padding: 4px 10px; font-size: 11px; cursor: pointer; font-family: var(--font-m); }
+
+  /* ── CARDS GRID ── */
+  .cards-area { flex: 1; overflow-y: auto; padding: 16px 20px; }
+  .cards-area::-webkit-scrollbar { width: 4px; }
+  .cards-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .empty-state { text-align: center; padding: 80px 20px; }
+  .empty-state .icon { font-size: 52px; margin-bottom: 16px; }
+  .empty-state h2 { font-family: var(--font-h); font-size: 18px; color: #1e3a5f; margin-bottom: 8px; }
+  .empty-state p  { color: #102030; font-size: 13px; }
+
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 14px; }
+
+  /* ── DELEGATE CARD ── */
+  .dcard {
+    background: linear-gradient(145deg, #f5f8ff, #eef2ff);
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 2px 20px rgba(0,0,0,.3);
+    border: 1.5px solid #dde5f5;
+    page-break-inside: avoid;
+  }
+  .dcard-header { padding: 16px 16px 12px; display: flex; gap: 12px; align-items: flex-start; }
+  .dcard-avatar {
+    width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-h); font-size: 15px; font-weight: 800; color: #fff;
+  }
+  .dcard-name { font-family: var(--font-h); font-size: 17px; font-weight: 800; color: #0a1628; }
+  .dcard-class { font-size: 11px; color: #64748b; margin-top: 2px; font-family: var(--font-m); }
+  .dcard-badge {
+    margin-left: auto; font-family: var(--font-m); font-size: 9px;
+    padding: 3px 8px; border-radius: 20px; color: #fff; font-weight: 500; flex-shrink: 0;
+  }
+
+  .dcard-fields { padding: 0 16px 12px; }
+  .dcard-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .dcard-label { font-family: var(--font-m); font-size: 9px; color: #94a3b8; letter-spacing: 1.5px; text-transform: uppercase; width: 72px; flex-shrink: 0; }
+  .dcard-val { font-size: 12px; font-weight: 700; color: #1e293b; }
+  .committee-pill { font-size: 10px; font-weight: 700; padding: 2px 9px; border-radius: 20px; color: #fff; }
+
+  .dcard-qr {
+    background: #fff; margin: 0 16px 12px; border-radius: 12px;
+    padding: 14px; text-align: center;
+    border: 1px solid #e2e8f0;
+  }
+  .dcard-qr img { display: block; margin: 0 auto; border-radius: 6px; }
+  .dcard-qr-url { font-family: var(--font-m); font-size: 8px; color: #94a3b8; margin-top: 6px; word-break: break-all; }
+
+  .dcard-footer {
+    padding: 10px 16px; border-top: 1px solid #dde5f5;
+    display: flex; justify-content: space-between; align-items: center;
+    background: linear-gradient(90deg, #edf0fc, #e8eef8);
+  }
+  .dcard-footer-sr { font-family: var(--font-m); font-size: 10px; color: #94a3b8; }
+  .dcard-footer-contact { font-size: 11px; color: #475569; display: flex; align-items: center; gap: 4px; }
+
+  /* ── PRINT ── */
+  @media print {
+    .sidebar, .topbar, .actionbar, .url-banner { display: none !important; }
+    .main { display: block !important; }
+    .cards-area { overflow: visible !important; padding: 0 !important; }
+    .dcard { break-inside: avoid; box-shadow: none !important; margin-bottom: 14px; }
+    body, html { overflow: visible !important; height: auto !important; background: #fff !important; }
+    .shell, .body { display: block !important; height: auto !important; }
+  }
+
+  /* committee colors */
+  .c-UNCSW    { background: #7c3aed; }
+  .c-WHO      { background: #059669; }
+  .c-UNSC     { background: #dc2626; }
+  .c-AIPPM    { background: #d97706; }
+  .c-UNGA     { background: #2563eb; }
+  .c-UNHRC    { background: #db2777; }
+  .c-IPPhoto  { background: #7c3aed; }
+  .c-IPJourn  { background: #ca8a04; }
+  .c-IPCaric  { background: #b45309; }
+  .c-WHOBeg   { background: #0d9488; }
+  .c-IPL      { background: #9333ea; }
+  .c-default  { background: #475569; }
+</style>
+</head>
+<body>
+<div class="shell">
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="logo-badge">M</div>
+    <div class="topbar-title">
+      <h1>SPSMUN 3.0 · HOD Dashboard</h1>
+      <p>MODEL UNITED NATIONS · DELEGATE CREDENTIALS SYSTEM</p>
+    </div>
+    <div class="delegate-pill" id="delegateCount">51 Delegates</div>
+  </header>
+
+  <div class="body">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <div class="search-wrap">
+          <span style="font-size:14px;color:#4a6080">⌕</span>
+          <input type="text" id="searchInput" placeholder="Search name, committee, country…"/>
+        </div>
+      </div>
+      <div class="filters" id="filterBtns"></div>
+      <div class="list-header">
+        <span>Delegates</span>
+        <button class="select-all-btn" onclick="selectAll()">Select All</button>
+      </div>
+      <div class="delegate-list" id="delegateList"></div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <div class="actionbar">
+        <button class="btn-primary" onclick="window.print()">🖨 Print QR Cards</button>
+        <button class="btn-sec" onclick="selectAll()">Select All</button>
+        <button class="btn-sec" onclick="clearSelection()">Clear</button>
+        <span class="sel-count" id="selCount"></span>
+        <div style="margin-left:auto;display:flex;align-items:center;gap:8px">
+          <span style="font-family:var(--font-m);font-size:10px;color:var(--muted)">BASE URL:</span>
+          <span id="baseUrlDisplay" style="font-family:var(--font-m);font-size:10px;color:#60a5fa;"></span>
+          <button class="url-edit" onclick="changeUrl()">✎ Change</button>
+        </div>
+      </div>
+
+      <div class="cards-area" id="cardsArea">
+        <div class="empty-state">
+          <div class="icon">↖</div>
+          <h2>Select delegates to generate QR cards</h2>
+          <p>Use "Select All" or click individual delegates from the sidebar</p>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────────────────
+const SECRET = "SPSMUN3-HOD-2025";
+let BASE_URL = localStorage.getItem("spsmun_base_url") || "https://YOUR_USERNAME.github.io/spsmun";
+
+function changeUrl() {
+  const u = prompt("Enter your GitHub Pages base URL (no trailing slash):\ne.g. https://johndoe.github.io/spsmun", BASE_URL);
+  if (u) { BASE_URL = u.trim().replace(/\/$/, ""); localStorage.setItem("spsmun_base_url", BASE_URL); renderAll(); }
+}
+
+document.getElementById("baseUrlDisplay").textContent = BASE_URL;
+
+// ── TOKEN ────────────────────────────────────────────────────────────────
+function simpleHash(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = (h * 0x01000193) >>> 0;
+  }
+  return h.toString(36).toUpperCase().padStart(7, "0");
+}
+function makeToken(id) { return simpleHash(SECRET + id); }
+function delegateUrl(d) {
+  return `${BASE_URL}/delegate.html?id=${String(d.id).padStart(3,"0")}&t=${makeToken(d.id)}`;
+}
+
+// ── COMMITTEE STYLES ─────────────────────────────────────────────────────
+const C = {
+  "UNCSW":         { bg: "#7c3aed", cls: "c-UNCSW" },
+  "WHO":           { bg: "#059669", cls: "c-WHO"   },
+  "UNSC":          { bg: "#dc2626", cls: "c-UNSC"  },
+  "AIPPM":         { bg: "#d97706", cls: "c-AIPPM" },
+  "UNGA":          { bg: "#2563eb", cls: "c-UNGA"  },
+  "UNHRC":         { bg: "#db2777", cls: "c-UNHRC" },
+  "IP-Photography":{ bg: "#7c3aed", cls: "c-IPPhoto"},
+  "IP Photography":{ bg: "#7c3aed", cls: "c-IPPhoto"},
+  "IP-Journalism": { bg: "#ca8a04", cls: "c-IPJourn"},
+  "IP-Caricature": { bg: "#b45309", cls: "c-IPCaric"},
+  "WHO Beginners": { bg: "#0d9488", cls: "c-WHOBeg" },
+  "WHO BEGINNERS": { bg: "#0d9488", cls: "c-WHOBeg" },
+  "IPL":           { bg: "#9333ea", cls: "c-IPL"   },
+};
+function cStyle(c) { return C[c] || { bg: "#475569", cls: "c-default" }; }
+function initials(n) { return n.split(" ").slice(0,2).map(w=>w[0]).join("").toUpperCase(); }
+
+// ── DATA ─────────────────────────────────────────────────────────────────
+const DELEGATES = [
+  {id:1,  name:"Ansh",              cls:"5th",  section:"Sweeticia",    portfolio:"Turkiye",           committee:"UNCSW",          contact:"8437609948", minister:""},
+  {id:2,  name:"Japleen Kaur",      cls:"7th",  section:"Gladiolus",    portfolio:"Finland",           committee:"WHO",            contact:"7567125125", minister:""},
+  {id:3,  name:"Prathamesh Verma",  cls:"10th", section:"Frost",        portfolio:"Sudan",             committee:"WHO",            contact:"7404227950", minister:""},
+  {id:4,  name:"Yash Dhiman",       cls:"10th", section:"Frost",        portfolio:"Latvia",            committee:"UNSC",           contact:"7988639832", minister:""},
+  {id:5,  name:"Viraj Goswami",     cls:"9th",  section:"TS Eliot",     portfolio:"—",                 committee:"AIPPM",          contact:"9996770054", minister:"Pankaj Kr Gupta"},
+  {id:6,  name:"Marvi",             cls:"5th",  section:"Sweeticia",    portfolio:"Nepal",             committee:"WHO",            contact:"9857758901", minister:""},
+  {id:7,  name:"Akul Atri",         cls:"9th",  section:"Shakespeare",  portfolio:"Newzealand",        committee:"WHO",            contact:"7696066624", minister:""},
+  {id:8,  name:"Shivam Gupta",      cls:"8th",  section:"Iris",         portfolio:"—",                 committee:"IP-Caricature",  contact:"9877786395", minister:""},
+  {id:9,  name:"Khyati Bisht",      cls:"9th",  section:"Blake",        portfolio:"Brazil",            committee:"UNGA",           contact:"—",          minister:""},
+  {id:10, name:"Shreeya Sharma",    cls:"9th",  section:"TS Eliot",     portfolio:"Bahrain",           committee:"UNSC",           contact:"7807320811", minister:""},
+  {id:11, name:"Nipun Gaur",        cls:"9th",  section:"Shelly",       portfolio:"SLOVENIA",          committee:"UNGA",           contact:"9991511055", minister:""},
+  {id:12, name:"Pihu",              cls:"7th",  section:"Dahlia",       portfolio:"AUSTRIA",           committee:"WHO",            contact:"9416376023", minister:""},
+  {id:13, name:"Banveer Singh",     cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IP-Photography", contact:"8194949485", minister:""},
+  {id:14, name:"Niharika Sharma",   cls:"9th",  section:"TS Eliot",     portfolio:"Hungary",           committee:"UNGA",           contact:"8427492918", minister:""},
+  {id:15, name:"Vania Rana",        cls:"9th",  section:"TS Eliot",     portfolio:"Ethiopia",          committee:"UNGA",           contact:"9872795032", minister:""},
+  {id:16, name:"Harman Sharma",     cls:"9th",  section:"Shelly",       portfolio:"—",                 committee:"IP-Photography", contact:"9467239753", minister:""},
+  {id:17, name:"Saanvi",            cls:"9th",  section:"John Donne",   portfolio:"Morocco",           committee:"UNHRC",          contact:"9464705131", minister:""},
+  {id:18, name:"Bhavya Sharma",     cls:"9th",  section:"Shakespeare",  portfolio:"Sweden",            committee:"UNHRC",          contact:"7988787180", minister:""},
+  {id:19, name:"Vanya Tyagi",       cls:"10th", section:"Ruskin Bond",  portfolio:"Mexico",            committee:"UNGA",           contact:"9718591957", minister:""},
+  {id:20, name:"Abhijot Singh",     cls:"9th",  section:"O Henry",      portfolio:"—",                 committee:"IP-Journalism",  contact:"8427457182", minister:""},
+  {id:21, name:"Arpit Srivastava",  cls:"9th",  section:"Blake",        portfolio:"Germany",           committee:"UNGA",           contact:"7986431393", minister:""},
+  {id:22, name:"Krishit Singroha",  cls:"9th",  section:"Blake",        portfolio:"Netherlands",       committee:"UNGA",           contact:"8437302494", minister:""},
+  {id:23, name:"Aarab Bir",         cls:"10th", section:"Frost",        portfolio:"Sweden",            committee:"UNGA",           contact:"9316599266", minister:""},
+  {id:24, name:"Pulkit Singh",      cls:"9th",  section:"Shelly",       portfolio:"Serbia",            committee:"UNGA",           contact:"7719614502", minister:""},
+  {id:25, name:"Aarav Garg",        cls:"7th",  section:"Jasmine",      portfolio:"Ghana",             committee:"WHO Beginners",  contact:"8872481413", minister:""},
+  {id:26, name:"Aishra Gupta",      cls:"7th",  section:"Jasmine",      portfolio:"Yemen",             committee:"WHO Beginners",  contact:"9454566153", minister:""},
+  {id:27, name:"Siyona Bharwaj",    cls:"6th",  section:"Freesia",      portfolio:"Jamaica",           committee:"WHO BEGINNERS",  contact:"8351049760", minister:""},
+  {id:28, name:"Vamika Gupta",      cls:"7th",  section:"Primrose",     portfolio:"—",                 committee:"IP-Photography", contact:"7988203324", minister:""},
+  {id:29, name:"Chirag",            cls:"9th",  section:"Lawrence",     portfolio:"Colombia",          committee:"UNSC",           contact:"8360605816", minister:""},
+  {id:30, name:"Ansh Rana",         cls:"9th",  section:"Shelly",       portfolio:"—",                 committee:"IP Photography", contact:"9729460539", minister:""},
+  {id:31, name:"Abhay Sharma",      cls:"8th",  section:"Florentia",    portfolio:"—",                 committee:"IP Photography", contact:"9468001800", minister:""},
+  {id:32, name:"Tanmay Gautam",     cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IPL",            contact:"8289008191", minister:"Punjab Kings"},
+  {id:33, name:"Angel",             cls:"9th",  section:"Austen",       portfolio:"Tajikistan",        committee:"UNGA",           contact:"8295489180", minister:""},
+  {id:34, name:"Divyansh Chauhan",  cls:"9th",  section:"John Donne",   portfolio:"Argentina",         committee:"UNGA",           contact:"9996326606", minister:""},
+  {id:35, name:"Urmi",              cls:"9th",  section:"Kipling",      portfolio:"Luxembourg",        committee:"UNGA",           contact:"9690011275", minister:""},
+  {id:36, name:"Digvijay Sinver",   cls:"9th",  section:"Austen",       portfolio:"—",                 committee:"IP-Photography", contact:"8398000100", minister:""},
+  {id:37, name:"Ayushman",          cls:"6th",  section:"Hyacinth",     portfolio:"Somalia",           committee:"UNGA",           contact:"9452294523", minister:""},
+  {id:38, name:"Gurnoor",           cls:"9th",  section:"John Donne",   portfolio:"Algeria",           committee:"UNHRC",          contact:"8847442489", minister:""},
+  {id:39, name:"Sarvagya",          cls:"9th",  section:"Kipling",      portfolio:"Japan",             committee:"UNCSW",          contact:"7982759154", minister:""},
+  {id:40, name:"Digvi Chopra",      cls:"6th",  section:"Hyacinth",     portfolio:"Yemen",             committee:"UNGA",           contact:"8901370320", minister:""},
+  {id:41, name:"Manvi",             cls:"6th",  section:"Hyacinth",     portfolio:"Romania",           committee:"UNGA",           contact:"9646699777", minister:""},
+  {id:42, name:"Kanishka Sood",     cls:"9th",  section:"Kipling",      portfolio:"Peru",              committee:"UNCSW",          contact:"8285962410", minister:""},
+  {id:43, name:"Kanishka",          cls:"7th",  section:"Dhalia",       portfolio:"Cuba",              committee:"WHO Beginners",  contact:"8901355553", minister:""},
+  {id:44, name:"Abhimanyu",         cls:"7th",  section:"Dhalia",       portfolio:"Cyprus",            committee:"WHO Beginners",  contact:"9582416700", minister:""},
+  {id:45, name:"Aradhya",           cls:"7th",  section:"Dhalia",       portfolio:"Myanmar",           committee:"WHO Beginners",  contact:"9318037982", minister:""},
+  {id:46, name:"Yohaan Jassi",      cls:"7th",  section:"Azalea",       portfolio:"Malta",             committee:"WHO Beginners",  contact:"8288888131", minister:""},
+  {id:47, name:"Suryansh Pal",      cls:"7th",  section:"Gladiolus",    portfolio:"Bahrain",           committee:"UNGA",           contact:"9041164076", minister:""},
+  {id:48, name:"Gauri Verma",       cls:"9th",  section:"Kipling",      portfolio:"Mauritius",         committee:"UNCSW",          contact:"6283872134", minister:""},
+  {id:49, name:"Kaushal",           cls:"6th",  section:"Crocus",       portfolio:"Form To Be Filled", committee:"—",              contact:"not found",  minister:""},
+  {id:50, name:"Aayan Kalotra",     cls:"7th",  section:"Aster",        portfolio:"Cambodia",          committee:"WHO Beginners",  contact:"9646767650", minister:""},
+  {id:51, name:"Prakhar Gautam",    cls:"9th",  section:"Shakespeare",  portfolio:"Russian Federation", committee:"UNSC",          contact:"7049977318", minister:""},
+];
+
+// ── STATE ────────────────────────────────────────────────────────────────
+let selected = new Set();
+let activeFilter = "ALL";
+let searchTerm = "";
+
+// ── COMMITTEES LIST ──────────────────────────────────────────────────────
+const committees = ["ALL", ...Array.from(new Set(DELEGATES.map(d=>d.committee))).sort()];
+
+// ── INIT ─────────────────────────────────────────────────────────────────
+function init() {
+  // Filter buttons
+  const fb = document.getElementById("filterBtns");
+  committees.forEach(c => {
+    const btn = document.createElement("button");
+    btn.className = "filter-btn" + (c === "ALL" ? " active" : "");
+    if (c !== "ALL") btn.style.borderColor = cStyle(c).bg + "55";
+    btn.textContent = c;
+    btn.dataset.c = c;
+    if (c !== "ALL") btn.style.setProperty("--cc", cStyle(c).bg);
+    btn.onclick = () => { activeFilter = c; renderFilters(); renderSidebar(); };
+    fb.appendChild(btn);
+  });
+  renderSidebar();
+
+  document.getElementById("searchInput").addEventListener("input", e => {
+    searchTerm = e.target.value.toLowerCase();
+    renderSidebar();
+  });
+
+  document.getElementById("baseUrlDisplay").textContent = BASE_URL;
+}
+
+function renderFilters() {
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    const isActive = btn.dataset.c === activeFilter;
+    btn.classList.toggle("active", isActive);
+    if (isActive) {
+      const col = btn.dataset.c === "ALL" ? "#f5a623" : cStyle(btn.dataset.c).bg;
+      btn.style.background = col;
+      btn.style.color = "#fff";
+      btn.style.borderColor = "transparent";
+    } else {
+      btn.style.background = "var(--bg3)";
+      btn.style.color = "var(--muted)";
+      btn.style.borderColor = "var(--border)";
+    }
+  });
+}
+
+function filtered() {
+  return DELEGATES.filter(d => {
+    const ms = !searchTerm || d.name.toLowerCase().includes(searchTerm) ||
+      d.committee.toLowerCase().includes(searchTerm) ||
+      d.portfolio.toLowerCase().includes(searchTerm) ||
+      d.section.toLowerCase().includes(searchTerm);
+    const mf = activeFilter === "ALL" || d.committee === activeFilter;
+    return ms && mf;
+  });
+}
+
+function renderSidebar() {
+  const list = document.getElementById("delegateList");
+  const items = filtered();
+  list.innerHTML = "";
+  items.forEach(d => {
+    const cs = cStyle(d.committee);
+    const div = document.createElement("div");
+    div.className = "d-item" + (selected.has(d.id) ? " selected" : "");
+    div.style.borderLeftColor = selected.has(d.id) ? cs.bg : "transparent";
+    div.innerHTML = `
+      <div class="d-avatar" style="background:${cs.bg}22;border:1px solid ${cs.bg}44;color:${cs.bg}">${initials(d.name)}</div>
+      <div class="d-info">
+        <div class="name">${d.name}</div>
+        <div class="sub">${d.committee} · ${d.portfolio}</div>
+      </div>
+      <div class="d-num">#${d.id}</div>`;
+    div.onclick = () => { toggle(d.id); };
+    list.appendChild(div);
+  });
+}
+
+function toggle(id) {
+  if (selected.has(id)) selected.delete(id); else selected.add(id);
+  renderSidebar();
+  renderCards();
+}
+
+function selectAll() {
+  filtered().forEach(d => selected.add(d.id));
+  renderSidebar(); renderCards();
+}
+
+function clearSelection() {
+  selected.clear();
+  renderSidebar(); renderCards();
+}
+
+function renderCards() {
+  const area = document.getElementById("cardsArea");
+  const selArr = DELEGATES.filter(d => selected.has(d.id));
+  document.getElementById("selCount").textContent = selected.size > 0 ? `${selected.size} selected` : "";
+
+  if (selArr.length === 0) {
+    area.innerHTML = `<div class="empty-state"><div class="icon">↖</div><h2>Select delegates to generate QR cards</h2><p>Use "Select All" or click individual delegates from the sidebar</p></div>`;
+    return;
+  }
+
+  const grid = document.createElement("div");
+  grid.className = "cards-grid";
+
+  selArr.forEach(d => {
+    const cs = cStyle(d.committee);
+    const url = delegateUrl(d);
+    const qrSrc = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(url)}&color=0a1628&bgcolor=ffffff&qzone=1`;
+    const portLabel = d.committee === "AIPPM" || d.committee === "IPL" ? "MINISTER" : "PORTFOLIO";
+    const portVal = d.minister || d.portfolio;
+
+    const card = document.createElement("div");
+    card.className = "dcard";
+    card.innerHTML = `
+      <div class="dcard-header">
+        <div class="dcard-avatar" style="background:linear-gradient(135deg,${cs.bg},${cs.bg}aa)">${initials(d.name)}</div>
+        <div>
+          <div class="dcard-name">${d.name}</div>
+          <div class="dcard-class">CLASS ${d.cls.toUpperCase()} · ${d.section.toUpperCase()}</div>
+        </div>
+        <span class="dcard-badge" style="background:${cs.bg}">#${String(d.id).padStart(3,"0")}</span>
+      </div>
+      <div class="dcard-fields">
+        <div class="dcard-row">
+          <span class="dcard-label">COMMITTEE</span>
+          <span class="committee-pill" style="background:${cs.bg}">${d.committee}</span>
+        </div>
+        <div class="dcard-row">
+          <span class="dcard-label">${portLabel}</span>
+          <span class="dcard-val">${portVal}</span>
+        </div>
+        <div class="dcard-row">
+          <span class="dcard-label">CONTACT</span>
+          <span class="dcard-val" style="font-family:var(--font-m);font-size:11px">${d.contact}</span>
+        </div>
+      </div>
+      <div class="dcard-qr">
+        <img src="${qrSrc}" width="160" height="160" alt="QR Code for ${d.name}" loading="lazy"/>
+        <div class="dcard-qr-url">${url}</div>
+      </div>
+      <div class="dcard-footer">
+        <span class="dcard-footer-sr">SPSMUN 3.0 · SR #${d.id}</span>
+        <span class="dcard-footer-contact">📞 ${d.contact}</span>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  area.innerHTML = "";
+  area.appendChild(grid);
+  document.getElementById("baseUrlDisplay").textContent = BASE_URL;
+}
+
+function renderAll() {
+  renderSidebar();
+  renderCards();
+  document.getElementById("baseUrlDisplay").textContent = BASE_URL;
+}
+
+init();
+</script>
+</body>
+</html>
